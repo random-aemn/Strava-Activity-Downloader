@@ -37,7 +37,7 @@ public class Main {
     private static final String AUTH_URL = "https://www.strava.com/oauth/authorize";
     private static final String TOKEN_URL = "https://www.strava.com/oauth/token";
 
-//    These are the permissions required to get activities
+    //    These are the permissions required to get activities
     private static final String SCOPE = "read,activity:read";
 
     private static String ACCESS_TOKEN;
@@ -110,7 +110,7 @@ public class Main {
         String apiResponse = response.body();
 
 //        Arguments are: the JSON provided by the strava API response and the desired file path and filename for the CSV
-        writeActivitiesCsv(apiResponse, YOUR_DESIRED_FILE_LOCATION + LocalDate.now());
+        writeActivitiesCsv(apiResponse, YOUR_DESIRED_FILE_LOCATION + LocalDate.now() + ".csv");
 
     }
 
@@ -244,7 +244,7 @@ public class Main {
 
                         writer.write(String.join(",",
                                 activityDate,
-                                elevationGain,
+                                elevationGain + " meters",
                                 activityTime,
                                 type,
                                 escapeCsv(name),
