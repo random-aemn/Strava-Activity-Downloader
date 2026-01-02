@@ -43,6 +43,7 @@ public class Main {
     private static String ACCESS_TOKEN;
     private static final String STRAVA_API_URL = "https://www.strava.com/api/v3/athlete/activities";
     private static String authorizationCode;
+    private static String YOUR_DESIRED_FILE_LOCATION; // something like = "	C:\Users\BobSmith\Downloads\"
 
 
 
@@ -109,7 +110,7 @@ public class Main {
         String apiResponse = response.body();
 
 //        Arguments are: the JSON provided by the strava API response and the desired file path and filename for the CSV
-        writeActivitiesCsv(apiResponse, "C:\\Users\\ChristopherColclough\\Downloads\\" + LocalDate.now());
+        writeActivitiesCsv(apiResponse, YOUR_DESIRED_FILE_LOCATION + LocalDate.now());
 
     }
 
