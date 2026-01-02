@@ -66,6 +66,8 @@ public class Main {
             Thread.sleep(500);
         }
 
+
+
         System.out.println("Authorization code received: " + authorizationCode);
 
         // Exchange code for access token
