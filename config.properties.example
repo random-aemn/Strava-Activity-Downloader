@@ -1,4 +1,5 @@
 # config.properties.example
+# can be found at https://www.strava.com/settings/api
+
 STRAVA_CLIENT_ID=
 STRAVA_CLIENT_SECRET=
-OUTPUT_PATH=

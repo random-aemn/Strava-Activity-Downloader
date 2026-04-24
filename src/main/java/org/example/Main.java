@@ -156,7 +156,7 @@ public class Main {
 
         if (response.statusCode() == 200) {
             System.out.println("Activities from " + readableStartDate + " to " + readableEndDate + " were successfully retrieved");
-            System.out.println(response.body());
+//            System.out.println(response.body());
         } else {
             System.out.println("Request failed");
             System.out.println("Status: " + response.statusCode());
