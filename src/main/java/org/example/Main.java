@@ -7,8 +7,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.awt.*;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -21,18 +20,17 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Properties;
 
 public class Main {
     // -------------------------
     // CONFIGURATION
     // -------------------------
-    private static final String CLIENT_ID = "YOUR_CLIENT_ID";
-    private static final String CLIENT_SECRET = "YOUR_CLIENT_SECRET_FROM_STRAVA";
+//    private static final String CLIENT_ID = "119786";
+//    private static final String CLIENT_SECRET = "91e5083fa2fbdff3e8330407909fc08b93dd98a1";
     private static final String REDIRECT_URI = "http://localhost:8000/callback";
     private static final String AUTH_URL = "https://www.strava.com/oauth/authorize";
     private static final String TOKEN_URL = "https://www.strava.com/oauth/token";
@@ -43,11 +41,40 @@ public class Main {
     private static String ACCESS_TOKEN;
     private static final String STRAVA_API_URL = "https://www.strava.com/api/v3/athlete/activities";
     private static String authorizationCode;
-    private static String YOUR_DESIRED_FILE_LOCATION; // something like = "	C:\Users\BobSmith\Downloads\"
 
+    private static String OUTPUT_PATH;
+//    private static String YOUR_DESIRED_FILE_LOCATION = "C:\\Users\\ChristopherColclough\\Downloads\\";
+
+    private static final Properties CONFIG = new Properties();
+
+    static {
+        // Load the file from the project root
+        try (FileInputStream fis = new FileInputStream("config.properties")) {
+            CONFIG.load(fis);
+
+            if (CONFIG.getProperty("STRAVA_CLIENT_SECRET") == null || CONFIG.getProperty("STRAVA_CLIENT_ID") == null) {
+                // Verify keys aren't empty/null
+                System.err.println("FATAL: STRAVA_CLIENT_ID and/or STRAVA_CLIENT_SECRET is missing in config.properties.");
+                System.exit(1);
+            }
+
+        } catch (IOException e) {
+            System.err.println("CRITICAL: Could not find config.properties file!");
+            System.exit(1);
+        }
+
+        OUTPUT_PATH = System.getProperty("user.home") + File.separator + "Downloads" + File.separator;
+    }
+
+    // Look up tokens from the config.properties file
+    private static final String CLIENT_ID = CONFIG.getProperty("STRAVA_CLIENT_ID");
+    private static final String CLIENT_SECRET = CONFIG.getProperty("STRAVA_CLIENT_SECRET");
 
 
     public static void main(String[] args) throws Exception {
+
+            System.out.println("hello");
+
 
         // Start callback server
         startCallbackServer();
@@ -73,19 +100,48 @@ public class Main {
 
         // Exchange code for access token
         String jsonResponse = exchangeCodeForToken(authorizationCode);
+        System.out.println(jsonResponse);
+
 
         ACCESS_TOKEN = extractAccessToken(jsonResponse);
 
-        // Calculate start of today (Unix timestamp)
-        long startOfToday = LocalDate.now()
-                .atStartOfDay(ZoneId.systemDefault())
-                .toEpochSecond();
+        // Create date formatter
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+        //  Get the LocalDate object
+        LocalDate startDateAsDate = LocalDate.now();
 
+        // Convert it to a long datatype for the API and assign it to January 1 of the current year
+        long startDateAsLong =  startDateAsDate
+                                .withDayOfYear(1)
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toEpochSecond();
+
+        // Create a readable date for the user
+        String readableStartDate =  startDateAsDate
+                                    .withDayOfYear(1)
+                                    .atStartOfDay(ZoneId.systemDefault())
+                                    .format(formatter);
+
+        System.out.println(readableStartDate);
+
+        //  Get the LocalDate object for the end date
+        LocalDate endDateAsDate = LocalDate.now();
+
+        // Convert it to a long datatype for the API
+        long endDateAsLong =    endDateAsDate
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toEpochSecond();
+
+        // Create a readable date for the user
+        String readableEndDate = endDateAsDate
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .format(formatter);
+        System.out.println(readableEndDate);
 
         // Build request URL
         String requestUrl = STRAVA_API_URL +
-                "?after=" + startOfToday +
+                "?after=" + startDateAsLong +
                 "&per_page=50";
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -99,7 +155,7 @@ public class Main {
                 client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 200) {
-            System.out.println("Today's activities:");
+            System.out.println("Activities from " + readableStartDate + " to " + readableEndDate + " were successfully retrieved");
             System.out.println(response.body());
         } else {
             System.out.println("Request failed");
@@ -110,7 +166,7 @@ public class Main {
         String apiResponse = response.body();
 
 //        Arguments are: the JSON provided by the strava API response and the desired file path and filename for the CSV
-        writeActivitiesCsv(apiResponse, YOUR_DESIRED_FILE_LOCATION + LocalDate.now() + ".csv");
+        writeActivitiesCsv(apiResponse, OUTPUT_PATH + LocalDate.now() + ".csv");
 
     }
 
