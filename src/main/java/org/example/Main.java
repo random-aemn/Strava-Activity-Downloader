@@ -29,8 +29,7 @@ public class Main {
     // -------------------------
     // CONFIGURATION
     // -------------------------
-//    private static final String CLIENT_ID = "119786";
-//    private static final String CLIENT_SECRET = "91e5083fa2fbdff3e8330407909fc08b93dd98a1";
+
     private static final String REDIRECT_URI = "http://localhost:8000/callback";
     private static final String AUTH_URL = "https://www.strava.com/oauth/authorize";
     private static final String TOKEN_URL = "https://www.strava.com/oauth/token";
@@ -43,10 +42,15 @@ public class Main {
     private static String authorizationCode;
 
     private static String OUTPUT_PATH;
-//    private static String YOUR_DESIRED_FILE_LOCATION = "C:\\Users\\ChristopherColclough\\Downloads\\";
 
-    private static final Properties CONFIG = new Properties();
+    private static final Properties CONFIG = new Properties(); // Config file that holds the client_id and client_secret
 
+    /*
+    Static initializer block runs BEFORE anything in the main method
+
+    This block is executed when the class is loaded into memory by the JVM - allowing me to initialize the static variables
+    and/or perform configuration tasks required for program execution
+    */
     static {
         // Load the file from the project root
         try (FileInputStream fis = new FileInputStream("config.properties")) {
